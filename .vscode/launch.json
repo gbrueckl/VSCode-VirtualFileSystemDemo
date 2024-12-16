@@ -1,0 +1,89 @@
+// A launch configuration that compiles the extension and then opens it inside a new window
+{
+    "version": "0.2.0",
+    "configurations": [  
+        {
+            "name": "Launch FabricStudio",
+            "type": "extensionHost",
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceRoot}",
+                "${workspaceRoot}/utils/VirtualFS.test.code-workspace",
+                "--disable-extensions",
+				"--skip-release-notes",
+				"--skip-welcome",
+            ],
+            "sourceMaps": true,
+            "outFiles": [
+                "${workspaceRoot}/dist/node/**/*.js"
+            ],
+            "preLaunchTask": "pre-build",
+            "skipFiles": [
+                "<node_internals>/**",
+                "${workspaceFolder}/node_modules/**/*.js",
+                "${workspaceFolder}/node_modules/**/*.ts"
+            ]
+        },
+        {
+            "name": "Launch FabricStudio Web",
+            "type": "extensionHost",
+            "debugWebWorkerHost": true,
+            "request": "launch",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}",
+                "--extensionDevelopmentKind=web",
+                "${workspaceRoot}/utils/VirtualFS.code-workspace",
+                "--disable-extensions",
+				"--skip-release-notes",
+				"--skip-welcome",
+            ],
+            "outFiles": [
+                "${workspaceFolder}/dist/web/**/*.js"
+            ],
+            "preLaunchTask": "npm: watch",
+            "skipFiles": [
+                "<node_internals>/**",
+                "${workspaceFolder}/node_modules/**/*.js",
+                "${workspaceFolder}/node_modules/**/*.ts"
+            ]
+        },
+        {
+            "name": "Launch FabricStudio Web Browser", 
+            // for some reason this is not working properly at the moment
+            // mainly due to authentication which gets stuck in an endless loop
+            "request": "launch",
+            "runtimeArgs": [
+                "run",
+                "open-in-browser",
+                "--disable-extensions",
+				"--skip-release-notes",
+				"--skip-welcome", 
+                "--browserType=chromium",
+                "--quality=stable"
+            ],
+            "runtimeExecutable": "npm",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        },
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "Attach to Extension Host",
+            "port": 5870,
+            "restart": true,
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ],
+            "skipFiles": [
+                "<node_internals>/**/*.js",
+                "${workspaceFolder}/node_modules/**/*.js",
+                "main.js",
+                "extension.bundle.js",
+                "extensionHostProcess.js",
+            ]
+        }
+    ]
+}
