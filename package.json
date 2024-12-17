@@ -2,7 +2,7 @@
 	"name": "virtualfssample",
 	"displayName": "Virtual FileSystem Sample",
 	"description": "Virtual FileSystem Sample",
-	"version": "0.0.1",
+	"version": "0.2.0",
 	"publisher": "GerhardBrueckl",
 	"author": {
 		"name": "Gerhard Brueckl"
@@ -44,33 +44,39 @@
 	"contributes": {
 		"commands": [
 			{
-				"category": "Virtual FileSystem",
 				"command": "VirtualFS.uploadFile",
-				"title": "Upload File to VirtualFS"
+				"title": "Upload File to VirtualFS",
+				"category": "Virtual FileSystem"
 			},
 			{
-				"category": "Virtual FileSystem",
 				"command": "VirtualFS.showInExplorer",
-				"title": "Show VirtualFS in Explorer"
+				"title": "Show VirtualFS in Explorer",
+				"category": "Virtual FileSystem"
 			},
 			{
-				"category": "Virtual FileSystem",
 				"command": "VirtualFS.delete",
-				"title": "Delete file in VirtualFS"
+				"title": "Delete file from VirtualFS",
+				"category": "Virtual FileSystem"
+			},
+			{
+				"command": "VirtualFS.openDefaultFiles",
+				"title": "Open Default Files in VirtualFS",
+				"category": "Virtual FileSystem"
 			}
 		],
-		"explorer/context": [
-			{
-				"command": "VirtualFS.delete",
-				"when": "resourceScheme == virtualfs",
-				"group": "2_workspace"
-			},
-			{
-				"command": "VirtualFS.uploadFile",
-				"when": "resourceScheme == virtualfs",
-				"group": "2_workspace"
-			}
-		]
+		"menus": {
+			"explorer/context": [
+				{
+					"command": "VirtualFS.delete",
+					"when": "resourceScheme == virtualfs",
+					"group": "2_workspace"
+				},
+				{
+					"command": "VirtualFS.uploadFile",
+					"group": "2_workspace"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run package",

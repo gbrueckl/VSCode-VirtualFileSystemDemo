@@ -14,31 +14,41 @@ export class VirtualFileSystemProvider implements vscode.FileSystemProvider, vsc
 		context.subscriptions.push(vscode.workspace.registerFileSystemProvider(VIRTUALFS_SCHEME, fsp, { isCaseSensitive: false }));
 	}
 
-	public static async createTempFile(path: string, content: Uint8Array): Promise<vscode.Uri> {
+	public static async createVirtualFile(path: string, content: Uint8Array): Promise<vscode.Uri> {
 		let uri = vscode.Uri.parse(`${VIRTUALFS_SCHEME}:///${path}`);
 		VirtualFileSystemProvider.cache.set(uri.toString(), Buffer.from(content));
 
 		return uri;
 	}
 
-	public static async uploadFile(): Promise<vscode.Uri> {
-		const file = await vscode.window.showOpenDialog({
-			"title": "Upload file", 
-			"canSelectFiles": false, 
-			"canSelectFolders": false, 
-			"canSelectMany": false, 
-			"openLabel": 
-			"Upload"
-		});
+	public static async copyToVirtualFileSystem(uri: vscode.Uri): Promise<vscode.Uri> {
+		const fileName = uri.path.split("/").pop();
+		const content = await vscode.workspace.fs.readFile(uri)
 
-		if (!file) {
-			return null;
+		let newUri = vscode.Uri.parse(`${VIRTUALFS_SCHEME}:///${fileName}`);
+		VirtualFileSystemProvider.cache.set(newUri.toString(), Buffer.from(content));
+
+		return uri;
+	}
+
+	public static async uploadFile(uri: vscode.Uri = undefined): Promise<vscode.Uri> {
+		if (uri == undefined) {
+			const file = await vscode.window.showOpenDialog({
+				"title": "Upload file",
+				"canSelectFiles": false,
+				"canSelectFolders": false,
+				"canSelectMany": false,
+				"openLabel":
+					"Upload"
+			});
+
+			if (!file) {
+				return null;
+			}
 		}
+		const fileName = uri.path.split("/").pop();
 
-		const uri = file[0];
-		const fileName = uri.path.split("/").pop().toLowerCase();
-
-		const newUri = this.createTempFile(fileName, await vscode.workspace.fs.readFile(uri));
+		const newUri = this.createVirtualFile(fileName, await vscode.workspace.fs.readFile(uri));
 
 		vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer", vscode.Uri.parse(`${VIRTUALFS_SCHEME}:///`));
 	}
@@ -50,6 +60,8 @@ export class VirtualFileSystemProvider implements vscode.FileSystemProvider, vsc
 
 	public static async delete(uri: vscode.Uri) {
 		VirtualFileSystemProvider.cache.delete(uri.toString());
+
+		vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer", vscode.Uri.parse(`${VIRTUALFS_SCHEME}:///`));
 	}
 
 	// -- manage file metadata
@@ -65,7 +77,7 @@ export class VirtualFileSystemProvider implements vscode.FileSystemProvider, vsc
 			}
 		}
 
-		if(uri.path === "/") {
+		if (uri.path === "/") {
 			return {
 				type: vscode.FileType.Directory,
 				size: 0,
@@ -80,7 +92,7 @@ export class VirtualFileSystemProvider implements vscode.FileSystemProvider, vsc
 	async readDirectory(uri: vscode.Uri): Promise<[string, vscode.FileType][]> {
 		const result: [string, vscode.FileType][] = [];
 
-		if(uri.path === "/") {
+		if (uri.path === "/") {
 			for (const key of VirtualFileSystemProvider.cache.keys()) {
 				const item = VirtualFileSystemProvider.cache.get(key);
 				result.push([key, item ? vscode.FileType.File : vscode.FileType.Unknown]);
@@ -92,7 +104,7 @@ export class VirtualFileSystemProvider implements vscode.FileSystemProvider, vsc
 
 	// --- manage file contents
 	async readFile(uri: vscode.Uri): Promise<Uint8Array> {
-		const item = VirtualFileSystemProvider.cache.get(uri.toString().toLowerCase());
+		const item = VirtualFileSystemProvider.cache.get(uri.toString());
 
 		return item;
 	}
